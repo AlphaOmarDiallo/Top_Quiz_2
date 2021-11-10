@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Top Quiz 2</string>
+    <string name="welcome_what_s_your_name">Welcome! What\'s your name?</string>
+    <string name="please_type_your_name">Please type your name</string>
+    <string name="let_s_play">Let\'s play</string>
+    <string name="answer_1">answer 1</string>
+    <string name="answer_2">answer 2</string>
+    <string name="answer_3">answer 3</string>
+    <string name="answer_4">answer 4</string>
+    <string name="Question">Question</string>
+</resources>
