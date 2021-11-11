@@ -23,7 +23,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Button mButton2;
     private Button mButton3;
     private Button mButton4;
-    private QuestionBank mQuestionBank = generateQuestions();
+    private QuestionBank mQuestionBank;
     private int mRemainingQuestionCount;
     private Question mCurrentQuestion;
     private int mScore;
@@ -45,6 +45,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mButton3.setOnClickListener(this);
         mButton4.setOnClickListener(this);
 
+        mQuestionBank  = generateQuestionBank();
+
         mCurrentQuestion = mQuestionBank.getCurrentQuestion();
         displayQuestion(mQuestionBank.getCurrentQuestion());
 
@@ -59,7 +61,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mButton4.setText(question.getChoiceList().get(3));
     }
 
-    private QuestionBank generateQuestions(){
+    private QuestionBank generateQuestionBank(){
         Question question1 = new Question(
                 "Who is the creator of Android?",
                 Arrays.asList(
@@ -142,7 +144,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 ),
                 1
         );
-        return new QuestionBank(Arrays.asList(question1, question2, question3));
+        return new QuestionBank(Arrays.asList(question1, question2, question3, question4, question5, question6, question7, question8));
     }
 
     @Override
