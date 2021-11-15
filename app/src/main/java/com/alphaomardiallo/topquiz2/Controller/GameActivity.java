@@ -1,10 +1,14 @@
 package com.alphaomardiallo.topquiz2.Controller;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,7 +31,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private int mRemainingQuestionCount;
     private Question mCurrentQuestion;
     private int mScore;
+    public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE";
+    public static final String BUNDLE_STATE_SCORE = "BUNDLE_STATE_SCORE";
+    public static final String BUNDLE_STATE_QUESTION = "BUNDLE_STATE_QUESTION";
+    private boolean mEnableTouchEvents;
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return mEnableTouchEvents && super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(BUNDLE_STATE_SCORE, mScore);
+        outState.putInt(BUNDLE_STATE_QUESTION, mRemainingQuestionCount);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +65,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mButton3.setOnClickListener(this);
         mButton4.setOnClickListener(this);
 
+        mEnableTouchEvents = true;
+
         mQuestionBank  = generateQuestionBank();
 
         mCurrentQuestion = mQuestionBank.getCurrentQuestion();
         displayQuestion(mQuestionBank.getCurrentQuestion());
 
-        mRemainingQuestionCount = 3;
-        mScore = 0;
+        if (savedInstanceState != null) {
+            mScore = savedInstanceState.getInt(BUNDLE_STATE_SCORE);
+            mRemainingQuestionCount = savedInstanceState.getInt(BUNDLE_STATE_QUESTION);
+        } else {
+            mScore = 0;
+            mRemainingQuestionCount = 3;
+        }
+
     }
     private void displayQuestion(final Question question) {
         mTextViewQuestion.setText(question.getQuestion());
@@ -135,7 +163,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 3
         );
         Question question8 = new Question(
-                "How matches did Mohammed Ali lose in his career?",
+                "How many matches did Mohammed Ali lose in his career?",
                 Arrays.asList(
                         "None",
                         "One",
@@ -170,26 +198,38 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
         }
 
-        mRemainingQuestionCount--;
+        mEnableTouchEvents = false;
 
-        if (mRemainingQuestionCount > 0) {
-            mCurrentQuestion = mQuestionBank.getNextQuestion();
-            displayQuestion(mCurrentQuestion);
-        } else {
-            // No question left, end the game
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        new Handler(getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mEnableTouchEvents = true;
 
-            builder.setTitle("Well done!")
-                    .setMessage("Your score is " + mScore)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    })
-                    .create()
-                    .show();
-        }
+                mRemainingQuestionCount--;
 
+                if (mRemainingQuestionCount <= 0) {
+                    endGame();
+                } else {
+                    displayQuestion(mQuestionBank.getNextQuestion());
+                }
+            }
+        }, 2_000);
+    }
+
+    private void endGame(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Well done!")
+                .setMessage("Your score is " + mScore)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent();
+                        intent.putExtra(BUNDLE_EXTRA_SCORE, mScore);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                })
+                .create()
+                .show();
     }
 }
